@@ -15,7 +15,15 @@ RUN apt-get update && apt-get install -y \
     vim \
     unzip \
     git-lfs \
-    blender
+    blender \
+    libgl1 \
+    libglib2.0-0 \
+    libsm6 \
+    libxext6 \
+    libxrender1 \
+    libegl1 \
+    libxi6 \
+    libxkbcommon-x11-0
 
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends pkg-config libglvnd0 libgl1 libglx0 libegl1 libgles2 libglvnd-dev libgl1-mesa-dev libegl1-mesa-dev libgles2-mesa-dev cmake curl mesa-utils-extra libxrender1
 
@@ -26,6 +34,7 @@ ENV PYTHONDONTWRITEBYTECODE=1
 ENV PYTHONUNBUFFERED=1
 ENV LD_LIBRARY_PATH=/usr/lib64:$LD_LIBRARY_PATH
 ENV PYOPENGL_PLATFORM=egl
+ENV HF_HOME=/workspace/.cache/huggingface
 
 # Set CUDA environment variables
 ENV CUDA_HOME=/usr/local/cuda
@@ -57,12 +66,13 @@ ENV PATH="/workspace/miniconda3/envs/hunyuan3d21/bin:${PATH}"
 RUN conda config --set always_yes true
 
 RUN conda install Ninja
-RUN conda install cuda -c nvidia/label/cuda-12.4.1 -y
 
 # Update libstdcxx-ng to fix compatibility issues (auto-confirm)
 RUN conda install -c conda-forge libstdcxx-ng -y
 
 RUN pip install torch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1 --index-url https://download.pytorch.org/whl/cu124
+
+RUN pip install xformers
 
 # Clone Hunyuan3D-2.1 repository
 RUN git clone https://github.com/Tencent-Hunyuan/Hunyuan3D-2.1.git
@@ -77,7 +87,7 @@ RUN cd /workspace/Hunyuan3D-2.1/hy3dpaint/custom_rasterizer && \
     export TORCH_CUDA_ARCH_LIST="6.0;6.1;7.0;7.5;8.0;8.6;8.9;9.0" && \
     export CUDA_NVCC_FLAGS="-allow-unsupported-compiler" && \
     # Install with editable mode
-    pip install -e .
+    pip install --no-build-isolation -e .
 
 # Install DifferentiableRenderer
 RUN cd /workspace/Hunyuan3D-2.1/hy3dpaint/DifferentiableRenderer && \
