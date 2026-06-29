@@ -8,25 +8,41 @@ RUN mkdir -p /workspace
 WORKDIR /workspace
 
 # update package lists and install git, wget, vim, libegl1-mesa-dev, and libglib2.0-0
-RUN apt-get update && apt-get install -y \
+RUN apt-get update && \
+    DEBIAN_FRONTEND=noninteractive apt-get install -y \
     build-essential \
     git \
     wget \
-    vim \
     unzip \
+    vim \
     git-lfs \
     blender \
+    pkg-config \
+    cmake \
+    curl \
     libgl1 \
     libglib2.0-0 \
+    libegl1 \
+    libegl1-mesa-dev \
+    libgl1-mesa-dev \
+    libgles2-mesa-dev \
+    libglvnd0 \
+    libglvnd-dev \
+    libglx0 \
     libsm6 \
     libxext6 \
     libxrender1 \
-    libegl1 \
+    libxrender-dev \
     libxi6 \
-    libxkbcommon-x11-0
-
-RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends pkg-config libglvnd0 libgl1 libglx0 libegl1 libgles2 libglvnd-dev libgl1-mesa-dev libegl1-mesa-dev libgles2-mesa-dev cmake curl mesa-utils-extra libxrender1
-
+    libxkbcommon-x11-0 \
+    libeigen3-dev \
+    python3-dev \
+    python3-setuptools \
+    libcgal-dev \
+    mesa-utils-extra
+    apt-get clean && \
+    rm -rf /var/lib/apt/lists/*
+    
 # Install additional dependencies for compilation
 RUN apt-get install -y libeigen3-dev python3-dev python3-setuptools libcgal-dev
 
@@ -70,15 +86,18 @@ RUN conda install Ninja
 # Update libstdcxx-ng to fix compatibility issues (auto-confirm)
 RUN conda install -c conda-forge libstdcxx-ng -y
 
-RUN pip install torch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1 --index-url https://download.pytorch.org/whl/cu124
-
-RUN pip install xformers
+RUN pip install \
+    torch==2.5.1 \
+    torchvision==0.20.1 \
+    torchaudio==2.5.1 \
+    xformers \
+    --index-url https://download.pytorch.org/whl/cu124
 
 # Clone Hunyuan3D-2.1 repository
-RUN git clone https://github.com/Tencent-Hunyuan/Hunyuan3D-2.1.git
+COPY . /workspace/Hunyuan3D-2.1
 
 # Install Python dependencies from modified requirements.txt
-RUN grep -v "^bpy==" Hunyuan3D-2.1/requirements.txt > /tmp/requirements.txt && \
+RUN grep -v "^bpy==" /workspace/Hunyuan3D-2.1/requirements.txt > /tmp/requirements.txt && \
     pip install -r /tmp/requirements.txt
 
 # Install custom_rasterizer
@@ -112,7 +131,7 @@ WORKDIR /workspace/Hunyuan3D-2.1
 # Set global library paths to ensure proper linking at runtime
 ENV LD_LIBRARY_PATH="/workspace/miniconda3/envs/hunyuan3d21/lib:${LD_LIBRARY_PATH}"
 
-RUN apt-get install -y libxi6 libgconf-2-4 libxkbcommon-x11-0 libsm6 libxext6 libxrender-dev
+RUN apt-get install -y libgconf-2-4
 
 # Activate conda environment by default
 RUN echo "conda activate hunyuan3d21" >> ~/.bashrc
