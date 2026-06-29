@@ -68,7 +68,8 @@ RUN pip install torch==2.5.1 torchvision==0.20.1 torchaudio==2.5.1 --index-url h
 RUN git clone https://github.com/Tencent-Hunyuan/Hunyuan3D-2.1.git
 
 # Install Python dependencies from modified requirements.txt
-RUN pip install -r Hunyuan3D-2.1/requirements.txt
+RUN grep -v "^bpy==" Hunyuan3D-2.1/requirements.txt > /tmp/requirements.txt && \
+    pip install -r /tmp/requirements.txt
 
 # Install custom_rasterizer
 RUN cd /workspace/Hunyuan3D-2.1/hy3dpaint/custom_rasterizer && \
