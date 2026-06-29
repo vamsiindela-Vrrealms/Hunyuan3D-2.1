@@ -8,7 +8,14 @@ RUN mkdir -p /workspace
 WORKDIR /workspace
 
 # update package lists and install git, wget, vim, libegl1-mesa-dev, and libglib2.0-0
-RUN apt-get update && apt-get install -y build-essential git wget vim libegl1-mesa-dev libglib2.0-0 unzip git-lfs
+RUN apt-get update && apt-get install -y \
+    build-essential \
+    git \
+    wget \
+    vim \
+    unzip \
+    git-lfs \
+    blender
 
 RUN apt-get update && DEBIAN_FRONTEND=noninteractive apt-get install -y --no-install-recommends pkg-config libglvnd0 libgl1 libglx0 libegl1 libgles2 libglvnd-dev libgl1-mesa-dev libegl1-mesa-dev libgles2-mesa-dev cmake curl mesa-utils-extra libxrender1
 
